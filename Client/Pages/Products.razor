@@ -1,6 +1,6 @@
 ﻿@page "/products"
-@inject HttpClient Http
 @inject Client.Services.AuthService AuthService
+@inject Client.Services.ProductService ProductService
 @using Shared.Models
 
 <h3>My Products</h3>
@@ -43,17 +43,12 @@ else
 
     protected async Task GetProducts()
     {
-        HttpRequestMessage? request = new HttpRequestMessage(HttpMethod.Get, "api/Product/GetAll");
-        request.SetBrowserRequestCredentials(BrowserRequestCredentials.Include);
-        HttpResponseMessage? response = await Http.SendAsync(request);
-        if (!response.IsSuccessStatusCode)
+        products = await ProductService.GetAllProductsAsync();
+        if (products == null)
         {
-            IsLoggedIn = false;
-            Console.WriteLine($"❌ Failed: {response.StatusCode}");
-            return;
+            // request failed → probably not logged in
+            IsLoggedIn = await AuthService.IsLoggedInAsync();
         }
-        IsLoggedIn = true;
-        products = await response.Content.ReadFromJsonAsync<List<ProductDto>>();
     }
 
     protected override async Task OnInitializedAsync()

@@ -37,7 +37,6 @@ namespace Server.Controllers
                 HttpOnly = true,           // ✅ Cannot be read from JavaScript
                 Secure = true,             // ✅ Required for HTTPS
                 SameSite = SameSiteMode.Lax, // ✅ Required for cross-site requests (WASM -> API)
-                Expires = DateTime.UtcNow.AddMinutes(1)
             });
 
             return Ok(new { token });
@@ -65,19 +64,19 @@ namespace Server.Controllers
         {
             var tokenHandler = new JwtSecurityTokenHandler();
 
-            var claims = new[]
+            var claims = new Claim[]
             {
             new Claim("id", user.Id.ToString()),
-            new Claim(ClaimTypes.Name, user.Username)
-        };
+            new Claim("name", user.Username)
+            };
 
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(claims),
-                Expires = DateTime.UtcNow.AddHours(1),
                 SigningCredentials = new SigningCredentials(
                     new SymmetricSecurityKey(Encoding.ASCII.GetBytes(jwtSecret)),
-                    SecurityAlgorithms.HmacSha256Signature)
+                    SecurityAlgorithms.HmacSha256Signature),
+                Expires = DateTime.UtcNow.AddHours(1)
             };
 
             var token = tokenHandler.CreateToken(tokenDescriptor);

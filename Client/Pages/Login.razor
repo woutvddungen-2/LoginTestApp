@@ -1,6 +1,5 @@
 ﻿@page "/login"
-@inject HttpClient Http
-@inject NavigationManager navigationManager
+@inject Client.Services.AuthService AuthService
 @using Shared.Models
 
 <h3>Login</h3>
@@ -16,20 +15,14 @@
 }
 
 @code {
-    private string username { get; set; } = "";
-    private string password { get; set; } = "";
+    private string username = "";
+    private string password = "";
     private string message = "";
 
     private async Task LoginAsync()
     {
-        var request = new HttpRequestMessage(HttpMethod.Post, "api/User/login")
-        {
-            Content = JsonContent.Create(new LoginDto { Username = username, Password = password })
-        };
-        request.SetBrowserRequestCredentials(BrowserRequestCredentials.Include);
-        var response = await Http.SendAsync(request);
-
-        if (response.IsSuccessStatusCode)
+        bool result = await AuthService.LoginAsync(username, password);
+        if (result)
         {
             message = "Login successful!";
         }
@@ -38,15 +31,11 @@
             message = "Invalid username or password";
         }
     }
+
     private async Task LogoutAsync()
     {
-        var request = new HttpRequestMessage(HttpMethod.Post, "api/User/logout")
-        {
-            Content = JsonContent.Create(new LoginDto { Username = username, Password = password })
-        };
-        request.SetBrowserRequestCredentials(BrowserRequestCredentials.Include);
-        var response = await Http.SendAsync(request);
-        if (response.IsSuccessStatusCode)
+        bool result = await AuthService.LogoutAsync();
+        if (result)
         {
             message = "Logged out successfully";
         }

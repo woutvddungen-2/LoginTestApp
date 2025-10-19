@@ -40,35 +40,53 @@ builder.Services.AddAuthentication(options =>
     {
         OnMessageReceived = context =>
         {
-            if (context.Request.Cookies.TryGetValue("jwt", out var jwt))
+            string? token = null;
+            if (context.Request.Cookies.TryGetValue("jwt", out var jwtCookie))
             {
-                if (env.IsDevelopment())
-                    log.LogInformation("✅ JWT cookie received: {Snippet}", jwt[..Math.Min(20, jwt.Length)]);
-                context.Token = jwt;
+                token = jwtCookie;
+            }
+
+            // Assign token to the context so middleware can validate it
+            context.Token = token;
+
+            if (!string.IsNullOrEmpty(token) && env.IsDevelopment())
+            {
+                log.LogInformation("JWT cookie received: {Snippet}...", token[..Math.Min(token.Length, 20)]);
             }
             return Task.CompletedTask;
         },
         OnAuthenticationFailed = context =>
         {
             if (env.IsDevelopment())
-                log.LogWarning(context.Exception, "❌ JWT Authentication failed");
+                log.LogWarning(context.Exception, "JWT Authentication failed");
             return Task.CompletedTask;
         },
         OnTokenValidated = context =>
         {
-            if (env.IsDevelopment())
+            if (env.IsDevelopment() && context.Principal != null && context.Principal.Claims != null)
             {
-                var claims = context.Principal?.Claims?.Select(c => $"{c.Type}: {c.Value}");
-                if (claims != null)
+                var logText = string.Join("; ",
+                context.Principal.Claims
+                    .Where(c => c.Type != "nbf" && c.Type != "iat")
+                    .Select(c =>
+                    {
+                        if (c.Type == "exp" && long.TryParse(c.Value, out var expSeconds))
+                        {
+                            var expDate = DateTimeOffset.FromUnixTimeSeconds(expSeconds).UtcDateTime;
+                            return $"exp: {expDate:yyyy-MM-dd HH:mm:ss} UTC";
+                        }
+                        return $"{c.Type}: {c.Value}";
+                    })
+                );
+
+                if (!string.IsNullOrWhiteSpace(logText))
                 {
-                    foreach (var c in claims)
-                        log.LogInformation("🔹 Claim: {Claim}", c);
+                    log.LogInformation("JWT Contains: {Snippet}", logText);
                 }
-            }
+            }            
             return Task.CompletedTask;
         }
     };
-}); ;
 });
 
 // -------------------- Authorization --------------------

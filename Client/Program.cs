@@ -2,13 +2,13 @@
 using Client.Services;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
-using static System.Net.WebRequestMethods;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
 
 builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<ProductService>();
 builder.Services.AddScoped(sp =>
 {
     var http = new HttpClient
