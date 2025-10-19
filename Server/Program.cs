@@ -19,13 +19,21 @@ builder.Services.AddAuthentication(options =>
 })
 .AddJwtBearer(options =>
 {
+    var env = builder.Environment;
+    var loggerFactory = LoggerFactory.Create(logging =>
+    {
+        logging.AddConsole();
+        logging.SetMinimumLevel(LogLevel.Information);
+    });
+    var log = loggerFactory.CreateLogger("JWT");
+
     options.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuer = false,
         ValidateAudience = false,
         ValidateIssuerSigningKey = true,
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(jwtSecret)),
-        ClockSkew = TimeSpan.Zero // optional: avoid token time drift issues
+        ClockSkew = TimeSpan.Zero
     };
 
     options.Events = new JwtBearerEvents
@@ -34,29 +42,33 @@ builder.Services.AddAuthentication(options =>
         {
             if (context.Request.Cookies.TryGetValue("jwt", out var jwt))
             {
-                Console.WriteLine($"✅ JWT cookie received: {jwt.Substring(0, 20)}...");
+                if (env.IsDevelopment())
+                    log.LogInformation("✅ JWT cookie received: {Snippet}", jwt[..Math.Min(20, jwt.Length)]);
                 context.Token = jwt;
-            }
-            // Try to get the token from the "jwt" cookie
-            if (context.Request.Cookies.ContainsKey("jwt"))
-            {
-                context.Token = context.Request.Cookies["jwt"];
             }
             return Task.CompletedTask;
         },
         OnAuthenticationFailed = context =>
         {
-            Console.WriteLine("JWT Authentication Failed:");
-            Console.WriteLine(context.Exception.Message);
+            if (env.IsDevelopment())
+                log.LogWarning(context.Exception, "❌ JWT Authentication failed");
             return Task.CompletedTask;
         },
         OnTokenValidated = context =>
         {
-            // Optional: inspect claims
-            var claims = context.Principal.Claims.ToList();
+            if (env.IsDevelopment())
+            {
+                var claims = context.Principal?.Claims?.Select(c => $"{c.Type}: {c.Value}");
+                if (claims != null)
+                {
+                    foreach (var c in claims)
+                        log.LogInformation("🔹 Claim: {Claim}", c);
+                }
+            }
             return Task.CompletedTask;
         }
     };
+}); ;
 });
 
 // -------------------- Authorization --------------------
