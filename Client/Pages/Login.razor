@@ -1,0 +1,58 @@
+﻿@page "/login"
+@inject HttpClient Http
+@inject NavigationManager navigationManager
+@using Shared.Models
+
+<h3>Login</h3>
+
+<input @bind="username" placeholder="Username" />
+<input @bind="password" placeholder="Password" type="password" />
+<button @onclick="LoginAsync">Login</button>
+<button @onclick="LogoutAsync">Logout</button>
+
+@if(!string.IsNullOrEmpty(message))
+{
+    <p>@message</p>
+}
+
+@code {
+    private string username { get; set; } = "";
+    private string password { get; set; } = "";
+    private string message = "";
+
+    private async Task LoginAsync()
+    {
+        var request = new HttpRequestMessage(HttpMethod.Post, "api/User/login")
+        {
+            Content = JsonContent.Create(new LoginDto { Username = username, Password = password })
+        };
+        request.SetBrowserRequestCredentials(BrowserRequestCredentials.Include);
+        var response = await Http.SendAsync(request);
+
+        if (response.IsSuccessStatusCode)
+        {
+            message = "Login successful!";
+        }
+        else
+        {
+            message = "Invalid username or password";
+        }
+    }
+    private async Task LogoutAsync()
+    {
+        var request = new HttpRequestMessage(HttpMethod.Post, "api/User/logout")
+        {
+            Content = JsonContent.Create(new LoginDto { Username = username, Password = password })
+        };
+        request.SetBrowserRequestCredentials(BrowserRequestCredentials.Include);
+        var response = await Http.SendAsync(request);
+        if (response.IsSuccessStatusCode)
+        {
+            message = "Logged out successfully";
+        }
+        else
+        {
+            message = "Logout failed";
+        }
+    }
+}

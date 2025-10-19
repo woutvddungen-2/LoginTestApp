@@ -1,0 +1,161 @@
+:root {
+    --bottom-menu-height: 64px; /* define variable */
+}
+
+
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+}
+
+
+#app {
+    display: flex;
+    flex-direction: column;
+    min-height: calc(100vh - var(--bottom-menu-height)); /* always full viewport height */
+}
+
+.loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    font-size: 24px;
+    font-family: Arial, sans-serif;
+}
+
+.page {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.main-content {
+    flex: 1 1 auto; /* grow to fill available space */
+    padding: 16px;
+    padding-bottom: var(--bottom-menu-height);
+    overflow-y: auto; /* internal scroll if content too big */
+    box-sizing: border-box;
+}
+
+/* top left for login*/
+.top-left {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    z-index: 1100;
+    background-color: rgba(15, 23, 42, 0.9); /* match bottom nav colors */
+    color: white;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 14px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+}
+
+/* bottom nav */
+.bottom-menu {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: var(--bottom-menu-height);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    background: #0f172a;
+    color: white;
+    box-shadow: 0 -1px 6px rgba(0,0,0,0.2);
+    z-index: 1000;
+}
+
+.menu-btn {
+    background: none;
+    border: none;
+    color: inherit;
+    font: inherit;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 6px 10px;
+    text-decoration: none;
+}
+
+.menu-btn .icon {
+    font-size: 20px;
+    line-height: 1;
+}
+
+.menu-btn .label {
+    font-size: 12px;
+}
+
+.menu-btn.active {
+    color: #38bdf8;
+}
+
+/* make buttons behave nicely */
+.menu-btn:active, .menu-btn:focus {
+    outline: none;
+}
+
+/* ------------------ Loading Spinner ------------------ */
+.loading-progress {
+    width: 80px;
+    height: 80px;
+    display: block;
+    margin: 100px auto 0 auto;
+    transform-origin: 50% 50%;
+    animation: rotate 1.5s linear infinite;
+}
+
+.loading-progress circle {
+    fill: none;
+    stroke-width: 8;
+    stroke: #38bdf8; /* blue color */
+    stroke-linecap: round;
+    stroke-dasharray: 150;
+    stroke-dashoffset: 150;
+    transform-origin: 50% 50%;
+    animation: dash 1.5s ease-in-out infinite;
+}
+
+.loading-progress circle:nth-child(2) {
+    stroke: #0f172a; /* darker background stroke */
+    stroke-width: 8;
+    stroke-dasharray: 150;
+    stroke-dashoffset: 0;
+}
+
+.loading-progress-text {
+    text-align: center;
+    margin-top: 10px;
+    font-size: 14px;
+    color: #0f172a;
+    font-family: Arial, sans-serif;
+}
+
+/* Animations */
+@keyframes rotate {
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes dash {
+    0% {
+        stroke-dashoffset: 150;
+    }
+
+    50% {
+        stroke-dashoffset: 75;
+        transform: rotate(45deg);
+    }
+
+    100% {
+        stroke-dashoffset: 150;
+        transform: rotate(360deg);
+    }
+}
+

@@ -1,0 +1,88 @@
+﻿@page "/products"
+@inject HttpClient Http
+@inject Client.Services.AuthService AuthService
+@using Shared.Models
+
+<h3>My Products</h3>
+
+@* <input @bind="NewName" placeholder="Product Name" />
+<input @bind="NewPrice" placeholder="Price" type="number" />
+<button @onclick="AddProduct">Add Product</button> *@
+
+@if (!IsLoggedIn)
+{
+    <p>You must be logged in to see your products.</p>
+}
+else
+{
+    if (products == null)
+    {
+    <p>Press the button to Retrieve Items</p>
+    }
+    else if (products.Count == 0)
+    {
+        <p>No products found.</p>
+    }
+    else
+    {
+        <ul>
+        @foreach (var p in products)
+        {
+            <li>@p.Name - @p.Price</li>
+        }
+        </ul>
+    }
+    <button @onclick="GetProducts">Get Products</button>
+}
+
+
+@code 
+{
+    bool IsLoggedIn = false;
+    private List<ProductDto>? products;
+
+    protected async Task GetProducts()
+    {
+        HttpRequestMessage? request = new HttpRequestMessage(HttpMethod.Get, "api/Product/GetAll");
+        request.SetBrowserRequestCredentials(BrowserRequestCredentials.Include);
+        HttpResponseMessage? response = await Http.SendAsync(request);
+        if (!response.IsSuccessStatusCode)
+        {
+            IsLoggedIn = false;
+            Console.WriteLine($"❌ Failed: {response.StatusCode}");
+            return;
+        }
+        IsLoggedIn = true;
+        products = await response.Content.ReadFromJsonAsync<List<ProductDto>>();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        IsLoggedIn = await AuthService.IsLoggedInAsync();
+    }
+}
+
+@*     private async Task AddProduct()
+    {
+        if (!string.IsNullOrEmpty(Token))
+        {
+            Http.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", Token);
+        }
+
+        var dto = new Product { Name = NewName, Price = NewPrice };
+        var response = await Http.PostAsJsonAsync("api/Product", dto);
+        if (response.IsSuccessStatusCode)
+        {
+            products.Add(await response.Content.ReadFromJsonAsync<Product>());
+            NewName = "";
+            NewPrice = 0;
+        }
+    }
+
+    private class Product
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public decimal Price { get; set; }
+    }
+} *@

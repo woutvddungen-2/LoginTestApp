@@ -1,0 +1,31 @@
+﻿@inherits LayoutComponentBase
+
+
+@*<div style="top-left">
+    <LoginStatus />
+</div>*@
+
+<div class="main-content">
+    @Body
+</div>
+
+<nav class="bottom-menu" role="navigation">
+    <NavLink href="/" class="menu-btn" ActiveClass="active" Match="NavLinkMatch.All">
+        <div class="icon">🏠</div>
+        <div class="label">Home</div>
+    </NavLink>
+
+    <NavLink href="/products" class="menu-btn" ActiveClass="active" Match="NavLinkMatch.Prefix">
+        <div class="icon">☎️</div>
+        <div class="label">Products</div>
+    </NavLink>
+
+    <NavLink class="nav-link" href="cookiedebug">
+        <span class="oi oi-lock" aria-hidden="true"></span> Cookie Debug
+    </NavLink> 
+
+    <NavLink href="/login" class="menu-btn" ActiveClass="active" Match="NavLinkMatch.Prefix">
+        <div class="icon">🔑</div>
+        <div class="label">Login</div>
+    </NavLink>
+</nav>

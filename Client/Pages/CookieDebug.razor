@@ -1,0 +1,58 @@
+﻿@page "/cookiedebug"
+@inject HttpClient Http
+@inject IJSRuntime JS
+
+<h3>Cookie Debug Tool</h3>
+
+<p>
+    <button class="btn btn-primary" @onclick="LoginAndCheckCookie">Login & Check Cookie</button>
+</p>
+
+@if (!string.IsNullOrEmpty(Status))
+{
+    <p><strong>Status:</strong> @Status</p>
+}
+
+@if (!string.IsNullOrEmpty(CookieValue))
+{
+    <p><strong>Cookie:</strong> @CookieValue</p>
+}
+
+@code {
+    private string Status = "";
+    private string CookieValue = "";
+
+    private async Task LoginAndCheckCookie()
+    {
+        Status = "Logging in...";
+        CookieValue = "";
+        StateHasChanged();
+
+        // --- Perform login ---
+        var request = new HttpRequestMessage(HttpMethod.Post, "api/User/login")
+        {
+            Content = JsonContent.Create(new { username = "alice", password = "password123" })
+        };
+
+        // ✅ Allow cookies in the request
+        request.SetBrowserRequestCredentials(BrowserRequestCredentials.Include);
+
+        var response = await Http.SendAsync(request);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            Status = $"Login failed: {response.StatusCode}";
+            return;
+        }
+
+        Status = "Login successful. Checking browser cookies...";
+
+        // --- Check cookies using JS ---
+        CookieValue = await JS.InvokeAsync<string>("eval", "document.cookie");
+
+        if (string.IsNullOrWhiteSpace(CookieValue))
+            Status = "⚠️ No cookies found in browser.";
+        else
+            Status = "✅ Cookie(s) detected.";
+    }
+}
