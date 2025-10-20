@@ -1,6 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Configuration;
 using Server.Data;
 namespace Server
 {    public static class DbConnect
@@ -8,15 +6,16 @@ namespace Server
         public static void AddDatabase(IServiceCollection services, IConfigurationSection config)
         {
             string? connectionString = null;
-            string? server = config["Ip"];
-            string? database = config["DatabaseName"];
-            string? user = config["UserID"];
-            string? password = config["Password"];
+            string? server = config["Ip"] ?? "localhost";
+            string database = config["DatabaseName"] ?? throw new Exception("Database name missing.");
+            string user = config["UserID"] ?? throw new Exception("Database user missing.");
+            string password = config["Password"] ?? throw new Exception("Database password missing.");
             string? port = config["Port"] ?? "3306";
 
             if (server != null && database != null && user != null && password != null)
             {
                 connectionString = $"Server={server};Port={port};Database={database};User={user};Password={password};";
+                
                 services.AddDbContext<AppDbContext>(options =>
                 options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
             }
