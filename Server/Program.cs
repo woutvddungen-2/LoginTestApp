@@ -1,15 +1,15 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Server.Data;
+using Server.Services;
 using System.Text;
-using Server;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// -------------------- JWT Secret --------------------
-string jwtSecret = new JWTString().Secret;
-
 // -------------------- Authentication --------------------
+var jwtSecret = builder.Configuration["JwtSettings:Secret"] ?? throw new Exception("JWT secret missing");
+
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -93,6 +93,11 @@ builder.Services.AddAuthorization();
 // -------------------- Controllers --------------------
 builder.Services.AddControllers();
 
+//-------------------- Services --------------------
+builder.Services.AddScoped<MessageService>();
+builder.Services.AddScoped<ProductService>();
+builder.Services.AddScoped<UserService>();
+
 // -------------------- Swagger --------------------
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
@@ -134,14 +139,14 @@ builder.Services.AddCors(options =>
 });
 
 // -------------------- Database --------------------
-DbConnect.AddDatabase(builder.Services, builder.Configuration.GetSection("DatabaseSettings"));
+DbConnectService.AddDatabase(builder.Services, builder.Configuration.GetSection("DatabaseSettings"));
 
 var app = builder.Build();
 
 // -------------------- Logging --------------------
 var logger = app.Services.GetRequiredService<ILogger<Program>>();
 
-if (DbConnect.TestDatabaseConnection(app.Services, out Exception? ex))
+if (DbConnectService.TestDatabaseConnection(app.Services, out Exception? ex))
 {
     logger.LogInformation("Successfully connected to the database.");
 }
@@ -169,10 +174,3 @@ if (app.Environment.IsDevelopment())
 
 app.MapControllers();
 app.Run();
-
-
-// -------------------- JWT Secret Helper --------------------
-class JWTString
-{
-    public string Secret { get; private set; } = "ThisIsASuperSecretKey12345678901";
-}

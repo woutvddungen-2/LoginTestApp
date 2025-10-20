@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Server.Data;
-namespace Server
-{    public static class DbConnect
+namespace Server.Services
+{    public static class DbConnectService
     {
         public static void AddDatabase(IServiceCollection services, IConfigurationSection config)
         {
@@ -11,7 +11,7 @@ namespace Server
             string password = config["Password"] ?? throw new Exception("Database password missing.");
             string port = config["Port"] ?? "3306";
 
-            if (!string.IsNullOrEmpty(server) && !string.IsNullOrEmpty(database) && !string.IsNullOrEmpty(user) && !string.IsNullOrEmpty(password) && !string.IsNullOrEmpty(port))
+            if (!string.IsNullOrWhiteSpace(server) && !string.IsNullOrWhiteSpace(database) && !string.IsNullOrWhiteSpace(user) && !string.IsNullOrWhiteSpace(password) && !string.IsNullOrWhiteSpace(port))
             {
                 string connectionString = $"Server={server};Port={port};Database={database};User={user};Password={password};";
                 

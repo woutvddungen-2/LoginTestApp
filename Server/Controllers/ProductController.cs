@@ -1,47 +1,41 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Server.Data;
 using Server.Models;
+using Server.Services;
 using Shared.Models;
 
 namespace Server.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class ProductController : ControllerBase
     {
-        private readonly AppDbContext _dbContext;
+        private readonly ProductService _service;
 
-        public ProductController(AppDbContext dbContext)
+        public ProductController(ProductService service)
         {
-            _dbContext = dbContext;
+            _service = service;
         }
 
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpGet("GetAll")]
-        public IActionResult GetMyProducts()
+        public async Task<IActionResult> GetMyProducts()
         {
-            // Extract user ID from JWT claims
-            var userIdClaim = User.FindFirst("id");
-            if (userIdClaim == null) return Unauthorized();
-            if (!int.TryParse(userIdClaim.Value, out int userId)) return Unauthorized();
+            int userId;
+            try { userId = GetUserIdFromJwt(); }
+            catch { return Unauthorized(); }
 
-            var products = _dbContext.Products
-                .Where(p => p.UserId == userId)
-                .Select(p => new { p.Name, p.Price })
-                .ToList();
-
-            return Ok(products);
+            var products = await _service.GetProductsByUser(userId);
+            return Ok(products.Select(p => new { p.Name, p.Price }));
         }
 
-        [Authorize]
         [HttpPost]
-        public IActionResult AddProduct([FromBody] ProductDto dto)
+        public async Task<IActionResult> AddProduct([FromBody] ProductDto dto)
         {
-            var userIdClaim = User.FindFirst("id");
-            if (userIdClaim == null) return Unauthorized();
-            if (!int.TryParse(userIdClaim.Value, out int userId)) return Unauthorized();
+            int userId;
+            try { userId = GetUserIdFromJwt(); }
+            catch { return Unauthorized(); }
 
             var product = new Product
             {
@@ -49,11 +43,19 @@ namespace Server.Controllers
                 Price = dto.Price,
                 UserId = userId
             };
-
-            _dbContext.Products.Add(product);
-            _dbContext.SaveChanges();
-
+            var created = await _service.AddProductAsync(product);
             return Ok(product);
+        }
+
+        //-------------------- HELPERS --------------------
+        // Helper to extract user ID from JWT
+        private int GetUserIdFromJwt()
+        {
+            var userIdClaim = User.FindFirst("id") ?? throw new UnauthorizedAccessException();
+            if (!int.TryParse(userIdClaim.Value, out int userId))
+                throw new UnauthorizedAccessException();
+
+            return userId;
         }
     }
 }
