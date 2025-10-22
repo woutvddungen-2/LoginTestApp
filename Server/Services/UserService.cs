@@ -40,8 +40,8 @@ namespace Server.Services
             var tokenHandler = new JwtSecurityTokenHandler();
             var claims = new Claim[]
             {
-                new Claim("id", user.Id.ToString()),
-                new Claim("name", user.Username)
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new Claim(ClaimTypes.Name, user.Username)
             };
 
             var tokenDescriptor = new SecurityTokenDescriptor

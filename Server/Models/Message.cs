@@ -8,7 +8,7 @@
         public User Sender { get; set; } = null!;
 
         public int GroupId { get; set; }
-        public Group Group { get; set; } = null!;
+        public ChatGroup Group { get; set; } = null!;
         public string Content { get; set; } = null!;
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public bool IsEncrypted { get; set; } = false;

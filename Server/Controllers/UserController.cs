@@ -1,7 +1,8 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Shared.Models;
 using Server.Services;
+using Shared.Models;
 
 namespace Server.Controllers
 {
@@ -32,7 +33,7 @@ namespace Server.Controllers
             return Ok(new { token });
         }
 
-        [Authorize]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpGet("verify")]
         public IActionResult Verify()
         {
@@ -41,7 +42,7 @@ namespace Server.Controllers
         }
 
 
-        [Authorize]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost("logout")]
         public IActionResult Logout()
         {

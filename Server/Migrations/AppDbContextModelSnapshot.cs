@@ -22,7 +22,7 @@ namespace Server.Migrations
 
             MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
 
-            modelBuilder.Entity("Server.Models.Group", b =>
+            modelBuilder.Entity("Server.Models.ChatGroup", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -39,10 +39,10 @@ namespace Server.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Groups");
+                    b.ToTable("ChatGroups");
                 });
 
-            modelBuilder.Entity("Server.Models.GroupMember", b =>
+            modelBuilder.Entity("Server.Models.ChatGroupMember", b =>
                 {
                     b.Property<int>("UserId")
                         .HasColumnType("int");
@@ -50,11 +50,14 @@ namespace Server.Migrations
                     b.Property<int>("GroupId")
                         .HasColumnType("int");
 
+                    b.Property<DateTime>("JoinedAt")
+                        .HasColumnType("datetime(6)");
+
                     b.HasKey("UserId", "GroupId");
 
                     b.HasIndex("GroupId");
 
-                    b.ToTable("GroupMembers");
+                    b.ToTable("ChatGroupMembers");
                 });
 
             modelBuilder.Entity("Server.Models.Message", b =>
@@ -136,9 +139,9 @@ namespace Server.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("Server.Models.GroupMember", b =>
+            modelBuilder.Entity("Server.Models.ChatGroupMember", b =>
                 {
-                    b.HasOne("Server.Models.Group", "Group")
+                    b.HasOne("Server.Models.ChatGroup", "Group")
                         .WithMany("Members")
                         .HasForeignKey("GroupId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -157,7 +160,7 @@ namespace Server.Migrations
 
             modelBuilder.Entity("Server.Models.Message", b =>
                 {
-                    b.HasOne("Server.Models.Group", "Group")
+                    b.HasOne("Server.Models.ChatGroup", "Group")
                         .WithMany("Messages")
                         .HasForeignKey("GroupId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -185,7 +188,7 @@ namespace Server.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Server.Models.Group", b =>
+            modelBuilder.Entity("Server.Models.ChatGroup", b =>
                 {
                     b.Navigation("Members");
 

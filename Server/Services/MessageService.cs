@@ -18,7 +18,7 @@ namespace Server.Data
         public async Task<Message> SendMessageAsync(int senderId, int groupId, string content)
         {
             // Verify membership
-            bool isMember = await _db.GroupMembers
+            bool isMember = await _db.ChatGroupMembers
                 .AnyAsync(gm => gm.GroupId == groupId && gm.UserId == senderId);
 
             if (!isMember)
@@ -41,7 +41,7 @@ namespace Server.Data
         /// </summary>
         public async Task<List<Message>> GetMessagesForUserAsync(int userId, int groupId)
         {
-            bool isMember = await _db.GroupMembers
+            bool isMember = await _db.ChatGroupMembers
                 .AnyAsync(gm => gm.GroupId == groupId && gm.UserId == userId);
 
             if (!isMember)
@@ -57,7 +57,7 @@ namespace Server.Data
         /// <summary>
         /// Retrieves a message by its unique identifier.
         /// </summary>
-        public async Task<Message?> GetMessageByIdAsync(int id)
+        public async Task<Message?> GetMessageByIdAsync(long id)
         {
             return await _db.Messages.FindAsync(id);
         }

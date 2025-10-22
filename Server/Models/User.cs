@@ -10,7 +10,7 @@
 
         // Relationships
         public List<Product> Products { get; set; } = new();
-        public List<GroupMember> GroupMemberships { get; set; } = new();
+        public List<ChatGroupMember> GroupMemberships { get; set; } = new();
         public List<Message> Messages { get; set; } = new();
     }
 }

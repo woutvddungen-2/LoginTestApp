@@ -10,24 +10,24 @@ namespace Server.Data
         public DbSet<Product> Products { get; set; }
         public DbSet<Message> Messages { get; set; }
         public DbSet<User> Users { get; set; }
-        public DbSet<Group> Groups { get; set; }
-        public DbSet<GroupMember> GroupMembers { get; set; }
+        public DbSet<ChatGroup> ChatGroups { get; set; }
+        public DbSet<ChatGroupMember> ChatGroupMembers { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
             // Composite key for GroupMember
-            modelBuilder.Entity<GroupMember>()
+            modelBuilder.Entity<ChatGroupMember>()
                 .HasKey(gm => new { gm.UserId, gm.GroupId });
 
             // Relationships
-            modelBuilder.Entity<GroupMember>()
+            modelBuilder.Entity<ChatGroupMember>()
                 .HasOne(gm => gm.User)
                 .WithMany(u => u.GroupMemberships)
                 .HasForeignKey(gm => gm.UserId);
 
-            modelBuilder.Entity<GroupMember>()
+            modelBuilder.Entity<ChatGroupMember>()
                 .HasOne(gm => gm.Group)
                 .WithMany(g => g.Members)
                 .HasForeignKey(gm => gm.GroupId);

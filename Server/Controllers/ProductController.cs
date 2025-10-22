@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Server.Models;
 using Server.Services;
 using Shared.Models;
+using System.Security.Claims;
 
 namespace Server.Controllers
 {
@@ -51,7 +52,7 @@ namespace Server.Controllers
         // Helper to extract user ID from JWT
         private int GetUserIdFromJwt()
         {
-            var userIdClaim = User.FindFirst("id") ?? throw new UnauthorizedAccessException();
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier) ?? throw new UnauthorizedAccessException();
             if (!int.TryParse(userIdClaim.Value, out int userId))
                 throw new UnauthorizedAccessException();
 

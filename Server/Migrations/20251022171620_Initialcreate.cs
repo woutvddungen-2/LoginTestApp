@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Server.Migrations
 {
     /// <inheritdoc />
-    public partial class AddMessagingTables : Migration
+    public partial class Initialcreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -16,7 +16,7 @@ namespace Server.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                name: "Groups",
+                name: "ChatGroups",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -27,7 +27,7 @@ namespace Server.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Groups", x => x.Id);
+                    table.PrimaryKey("PK_ChatGroups", x => x.Id);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
@@ -49,23 +49,24 @@ namespace Server.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                name: "GroupMembers",
+                name: "ChatGroupMembers",
                 columns: table => new
                 {
                     GroupId = table.Column<int>(type: "int", nullable: false),
-                    UserId = table.Column<int>(type: "int", nullable: false)
+                    UserId = table.Column<int>(type: "int", nullable: false),
+                    JoinedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_GroupMembers", x => new { x.UserId, x.GroupId });
+                    table.PrimaryKey("PK_ChatGroupMembers", x => new { x.UserId, x.GroupId });
                     table.ForeignKey(
-                        name: "FK_GroupMembers_Groups_GroupId",
+                        name: "FK_ChatGroupMembers_ChatGroups_GroupId",
                         column: x => x.GroupId,
-                        principalTable: "Groups",
+                        principalTable: "ChatGroups",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_GroupMembers_Users_UserId",
+                        name: "FK_ChatGroupMembers_Users_UserId",
                         column: x => x.UserId,
                         principalTable: "Users",
                         principalColumn: "Id",
@@ -90,9 +91,9 @@ namespace Server.Migrations
                 {
                     table.PrimaryKey("PK_Messages", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Messages_Groups_GroupId",
+                        name: "FK_Messages_ChatGroups_GroupId",
                         column: x => x.GroupId,
-                        principalTable: "Groups",
+                        principalTable: "ChatGroups",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
@@ -112,7 +113,7 @@ namespace Server.Migrations
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     Name = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    Price = table.Column<decimal>(type: "decimal(65,30)", nullable: false),
+                    Price = table.Column<decimal>(type: "decimal(10,2)", nullable: false),
                     UserId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
@@ -128,8 +129,8 @@ namespace Server.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateIndex(
-                name: "IX_GroupMembers_GroupId",
-                table: "GroupMembers",
+                name: "IX_ChatGroupMembers_GroupId",
+                table: "ChatGroupMembers",
                 column: "GroupId");
 
             migrationBuilder.CreateIndex(
@@ -152,7 +153,7 @@ namespace Server.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "GroupMembers");
+                name: "ChatGroupMembers");
 
             migrationBuilder.DropTable(
                 name: "Messages");
@@ -161,7 +162,7 @@ namespace Server.Migrations
                 name: "Products");
 
             migrationBuilder.DropTable(
-                name: "Groups");
+                name: "ChatGroups");
 
             migrationBuilder.DropTable(
                 name: "Users");

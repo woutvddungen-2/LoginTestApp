@@ -1,16 +1,16 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Server.Data;
 using Server.Models;
 using Shared.Models;
 using System.Security.Claims;
-using System.Text.RegularExpressions;
 
 namespace Server.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class MessagesController : ControllerBase
     {
         private readonly MessageService _service;
@@ -38,12 +38,12 @@ namespace Server.Controllers
         }
 
         [HttpGet("Group/{id}")]
-        public async Task<ActionResult<List<Message>>> GetMessagesForUser(int groupId)
+        public async Task<ActionResult<List<Message>>> GetMessagesForUser(int id)
         {
             try
             {
                 int userId = GetUserIdFromJwt();
-                var messages = await _service.GetMessagesForUserAsync(userId, groupId);
+                var messages = await _service.GetMessagesForUserAsync(userId, id);
                 return Ok(messages);
             }
             catch (UnauthorizedAccessException ex)
@@ -63,13 +63,11 @@ namespace Server.Controllers
         //-------------------- HELPERS --------------------
         private int GetUserIdFromJwt()
         {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
-            if (userIdClaim == null)
-                throw new UnauthorizedAccessException("User ID not found in token.");
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier) ?? throw new UnauthorizedAccessException();
+            if (!int.TryParse(userIdClaim.Value, out int userId))
+                throw new UnauthorizedAccessException();
 
-            return int.Parse(userIdClaim.Value);
+            return userId;
         }
-
-
     }
 }
