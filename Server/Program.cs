@@ -61,27 +61,22 @@ builder.Services.AddAuthentication(options =>
         },
         OnTokenValidated = context =>
         {
-            if (env.IsDevelopment() && context.Principal != null && context.Principal.Claims != null)
+            if (env.IsDevelopment() && context.Principal != null)
             {
-                var logText = string.Join("; ",
-                context.Principal.Claims
-                    .Where(c => c.Type != "nbf" && c.Type != "iat")
-                    .Select(c =>
-                    {
-                        if (c.Type == "exp" && long.TryParse(c.Value, out var expSeconds))
-                        {
-                            var expDate = DateTimeOffset.FromUnixTimeSeconds(expSeconds).UtcDateTime;
-                            return $"exp: {expDate:yyyy-MM-dd HH:mm:ss} UTC";
-                        }
-                        return $"{c.Type}: {c.Value}";
-                    })
-                );
+                var idClaim = context.Principal.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? "unknown";
+                var nameClaim = context.Principal.Identity?.Name ?? /*context.Principal.FindFirst("name")?.Value ??*/ "unknown";
 
-                if (!string.IsNullOrWhiteSpace(logText))
+                var expClaim = context.Principal.FindFirst("exp")?.Value;
+                string expText = "unknown";
+                if (expClaim != null && long.TryParse(expClaim, out var expSeconds))
                 {
-                    log.LogInformation("JWT Contains: {Snippet}", logText);
+                    var expDate = DateTimeOffset.FromUnixTimeSeconds(expSeconds).UtcDateTime;
+                    expText = expDate.ToString("yyyy-MM-dd HH:mm:ss UTC");
                 }
-            }            
+
+                log.LogInformation("JWT Validated: UserId={UserId}, Username={Username}, ExpiresAt={Expiration}",
+                    idClaim, nameClaim, expText);
+            }
             return Task.CompletedTask;
         }
     };
