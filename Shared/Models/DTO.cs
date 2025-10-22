@@ -19,7 +19,14 @@ namespace Shared.Models
     
     public class MessageDto
     {
+        public int SenderId { get; set; }
+        public string SenderName { get; set; } = string.Empty;
         public int GroupId { get; set; }
-        public string Content { get; set; } = null!;        
+        public string Content { get; set; } = null!;
+    }
+    public class ChatGroupDto
+    {
+        public int Id { get; set; }
+        public string Name { get; set; } = null!;
     }
 }

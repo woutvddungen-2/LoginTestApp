@@ -1,0 +1,105 @@
+﻿@page "/chat"
+@using Client.Services
+@using Shared.Models
+@inject ChatService ChatService
+@inject AuthService AuthService
+
+<h3>Chat</h3>
+
+@if (!isLoggedIn)
+{
+    <p>Please log in to access chat groups.</p>
+}
+else
+{
+    <div>
+        @if (Groups == null || Groups.Count == 0)
+        {
+            <p>No chat groups available.</p>
+        }
+        else
+        {
+            <label>Select Group:</label>
+            <select @bind="SelectedGroupId" @bind:event="onchange">
+                <option value="0">-- Select --</option>
+                @foreach (var group in Groups)
+                {
+                    <option value="@group.Id">@group.Name</option>
+                }
+            </select>
+        }
+    </div>
+
+    @if (SelectedGroupId != 0)
+    {
+        <div style="margin-top:20px;">
+            <h4>Messages</h4>
+            <ul>
+                @foreach (var msg in Messages)
+                {
+                    <li><strong>@msg.SenderId:</strong> @msg.Content (@msg.CreatedAt.ToLocalTime())</li>
+                }
+            </ul>
+
+            <input type="text" @bind="NewMessage" placeholder="Type a message" />
+            <button class="btn btn-primary" @onclick="SendMessage">Send</button>
+        </div>
+    }
+}
+
+@code {
+    private List<ChatGroupDto>? Groups;
+    private List<Message> Messages = new();
+    private int selectedGroupId;
+    private string NewMessage = "";
+    private bool isLoggedIn = false;
+
+    private int SelectedGroupId
+    {
+        get => selectedGroupId;
+        set
+        {
+            if (selectedGroupId != value)
+            {
+                selectedGroupId = value;
+                _ = LoadMessagesAsync(selectedGroupId);
+            }
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        isLoggedIn = await AuthService.IsLoggedInAsync();
+        if (isLoggedIn)
+        {
+            Groups = await ChatService.GetGroupsAsync();
+        }
+    }
+
+    private async Task LoadMessagesAsync(int groupId)
+    {
+        if (groupId != 0)
+        {
+            Messages = await ChatService.GetMessagesAsync(groupId);
+            StateHasChanged();
+        }
+        else
+        {
+            Messages.Clear();
+        }
+    }
+
+    private async Task SendMessage()
+    {
+        if (!string.IsNullOrWhiteSpace(NewMessage) && SelectedGroupId != 0)
+        {
+            var sent = await ChatService.SendMessageAsync(SelectedGroupId, NewMessage);
+            if (sent != null)
+            {
+                Messages.Add(sent);
+                NewMessage = "";
+                StateHasChanged();
+            }
+        }
+    }
+}

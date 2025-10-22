@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Server.Models;
+using Shared.Models;
 
 namespace Server.Data
 {
@@ -19,7 +20,7 @@ namespace Server.Data
         {
             // Verify membership
             bool isMember = await _db.ChatGroupMembers
-                .AnyAsync(gm => gm.GroupId == groupId && gm.UserId == senderId);
+                .AnyAsync(gm => gm.ChatGroupId == groupId && gm.UserId == senderId);
 
             if (!isMember)
                 throw new UnauthorizedAccessException("User is not a member of this group.");
@@ -37,12 +38,24 @@ namespace Server.Data
         }
 
         /// <summary>
+        /// Retrieves all chat groups that a specific user is a member of.
+        /// </summary>
+        /// 
+        public async Task<List<ChatGroupDto>> GetChatGroupsForUserAsync(int userId)
+        {
+            return await _db.ChatGroupMembers
+                .Where(gm => gm.UserId == userId)
+                .Select(gm => new ChatGroupDto { Id = gm.ChatGroup.Id, Name = gm.ChatGroup.Name })
+                .ToListAsync();
+        }
+
+        /// <summary>
         /// Retrieves a list of messages for a specific user within a specified group.
         /// </summary>
         public async Task<List<Message>> GetMessagesForUserAsync(int userId, int groupId)
         {
             bool isMember = await _db.ChatGroupMembers
-                .AnyAsync(gm => gm.GroupId == groupId && gm.UserId == userId);
+                .AnyAsync(gm => gm.ChatGroupId == groupId && gm.UserId == userId);
 
             if (!isMember)
                 throw new UnauthorizedAccessException("User is not a member of this group.");
