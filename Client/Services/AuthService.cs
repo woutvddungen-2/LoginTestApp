@@ -63,6 +63,7 @@ namespace Client.Services
         public class LoginStatusResponse
         {
             public bool loggedIn { get; set; }
+            public string? username { get; set; }
         }
     }
 }

@@ -64,7 +64,7 @@ builder.Services.AddAuthentication(options =>
             if (env.IsDevelopment() && context.Principal != null)
             {
                 var idClaim = context.Principal.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? "unknown";
-                var nameClaim = context.Principal.Identity?.Name ?? /*context.Principal.FindFirst("name")?.Value ??*/ "unknown";
+                var nameClaim = context.Principal.Identity?.Name ?? "unknown";
 
                 var expClaim = context.Principal.FindFirst("exp")?.Value;
                 string expText = "unknown";

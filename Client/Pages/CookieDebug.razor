@@ -1,6 +1,5 @@
 ﻿@page "/cookiedebug"
 @inject HttpClient Http
-@inject IJSRuntime JS
 
 <h3>Cookie Debug Tool</h3>
 
@@ -13,31 +12,24 @@
     <p><strong>Status:</strong> @Status</p>
 }
 
-@if (!string.IsNullOrEmpty(CookieValue))
-{
-    <p><strong>Cookie:</strong> @CookieValue</p>
-}
-
 @code {
     private string Status = "";
-    private string CookieValue = "";
 
     private async Task LoginAndCheckCookie()
     {
         Status = "Logging in...";
-        CookieValue = "";
         StateHasChanged();
 
         // --- Perform login ---
-        var request = new HttpRequestMessage(HttpMethod.Post, "api/User/login")
+        HttpRequestMessage? request = new HttpRequestMessage(HttpMethod.Post, "api/User/login")
         {
-            Content = JsonContent.Create(new { username = "alice", password = "password123" })
+            Content = JsonContent.Create(new { username = "bob", password = "password123" })
         };
 
         // ✅ Allow cookies in the request
         request.SetBrowserRequestCredentials(BrowserRequestCredentials.Include);
 
-        var response = await Http.SendAsync(request);
+        HttpResponseMessage? response = await Http.SendAsync(request);
 
         if (!response.IsSuccessStatusCode)
         {
@@ -47,12 +39,31 @@
 
         Status = "Login successful. Checking browser cookies...";
 
-        // --- Check cookies using JS ---
-        CookieValue = await JS.InvokeAsync<string>("eval", "document.cookie");
+        // --- Check cookies using Verify ---
+        request = new HttpRequestMessage(HttpMethod.Get, "api/User/verify");
+        request.SetBrowserRequestCredentials(BrowserRequestCredentials.Include);
+        HttpResponseMessage? verifyResponse = await Http.SendAsync(request);
 
-        if (string.IsNullOrWhiteSpace(CookieValue))
-            Status = "⚠️ No cookies found in browser.";
+        if (verifyResponse.IsSuccessStatusCode)
+        {
+            VerifyResult? verifyData = await verifyResponse.Content.ReadFromJsonAsync<VerifyResult>();
+            if (verifyData != null)
+            {
+                Status = $"Authenticated successfully!, username: {verifyData.Username}";
+            }
+            else
+            {
+                Status = "Authentication succeeded but no data returned.";
+            }
+        }
         else
-            Status = "✅ Cookie(s) detected.";
+        {
+            Status = $"Authentication failed: {verifyResponse.StatusCode}";
+        }
+    }
+    private class VerifyResult
+    {
+        public bool loggedIn { get; set; }
+        public string Username { get; set; } = "";
     }
 }
