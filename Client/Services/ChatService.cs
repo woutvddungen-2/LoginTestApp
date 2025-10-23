@@ -9,9 +9,9 @@ namespace Client.Services
     {
         private readonly HttpClient httpClient;
 
-        public ChatService(HttpClient http)
+        public ChatService(HttpClient httpClient)
         {
-            httpClient = http;
+            this.httpClient = httpClient;
         }
 
         // --- Get all groups the user is a member of ---

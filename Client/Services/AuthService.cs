@@ -6,11 +6,11 @@ namespace Client.Services
 {
     public class AuthService
     {
-        private readonly HttpClient _httpClient;
+        private readonly HttpClient httpClient;
 
         public AuthService(HttpClient httpClient)
         {
-            _httpClient = httpClient;
+            this.httpClient = httpClient;
         }
 
         public async Task<bool> LoginAsync(string username, string password)
@@ -21,7 +21,7 @@ namespace Client.Services
             };
             request.SetBrowserRequestCredentials(BrowserRequestCredentials.Include);
 
-            var response = await _httpClient.SendAsync(request);
+            var response = await httpClient.SendAsync(request);
             return response.IsSuccessStatusCode;
         }
 
@@ -30,7 +30,7 @@ namespace Client.Services
             var request = new HttpRequestMessage(HttpMethod.Post, "api/User/logout");
             request.SetBrowserRequestCredentials(BrowserRequestCredentials.Include);
 
-            var response = await _httpClient.SendAsync(request);
+            var response = await httpClient.SendAsync(request);
             return response.IsSuccessStatusCode;
         }
 
@@ -41,7 +41,7 @@ namespace Client.Services
                 HttpRequestMessage? request = new HttpRequestMessage(HttpMethod.Get, "api/User/verify");
                 request.SetBrowserRequestCredentials(BrowserRequestCredentials.Include);
 
-                HttpResponseMessage? response = await _httpClient.SendAsync(request);
+                HttpResponseMessage? response = await httpClient.SendAsync(request);
 
                 if (response.IsSuccessStatusCode)
                 {

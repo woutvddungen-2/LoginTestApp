@@ -7,23 +7,23 @@ namespace Client.Services
 {
     public class ProductService
     {
-        private readonly HttpClient _httpClient;
+        private readonly HttpClient httpClient;
 
         public ProductService(HttpClient httpClient)
         {
-            _httpClient = httpClient;
+            this.httpClient = httpClient;
         }
 
         public async Task<List<Product>?> GetProductsAsync()
         {
-            return await _httpClient.GetFromJsonAsync<List<Product>>("api/Products");
+            return await httpClient.GetFromJsonAsync<List<Product>>("api/Products");
         }
 
         public async Task<List<ProductDto>?> GetAllProductsAsync()
         {
             HttpRequestMessage? request = new HttpRequestMessage(HttpMethod.Get, "api/Product/GetAll");
             request.SetBrowserRequestCredentials(BrowserRequestCredentials.Include);
-            HttpResponseMessage? response = await _httpClient.SendAsync(request);
+            HttpResponseMessage? response = await httpClient.SendAsync(request);
 
             if (!response.IsSuccessStatusCode)
             {
