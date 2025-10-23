@@ -37,7 +37,7 @@ else
             <ul>
                 @foreach (var msg in Messages)
                 {
-                    <li><strong>@msg.SenderId:</strong> @msg.Content (@msg.CreatedAt.ToLocalTime())</li>
+                    <li><strong>@msg.SenderName:</strong> @msg.Content (@msg.CreatedAt.ToLocalTime())</li>
                 }
             </ul>
 
@@ -49,7 +49,7 @@ else
 
 @code {
     private List<ChatGroupDto>? Groups;
-    private List<Message> Messages = new();
+    private List<MessageDto> Messages = new();
     private int selectedGroupId;
     private string NewMessage = "";
     private bool isLoggedIn = false;

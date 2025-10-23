@@ -16,7 +16,7 @@ namespace Server.Data
         /// <summary>
         /// Send a message to a group. Sender is validated via JWT.
         /// </summary>
-        public async Task<Message> SendMessageAsync(int senderId, int groupId, string content)
+        public async Task<MessageDto> SendMessageAsync(int senderId, int groupId, string content)
         {
             // Verify membership
             bool isMember = await _db.ChatGroupMembers
@@ -34,7 +34,18 @@ namespace Server.Data
 
             _db.Messages.Add(message);
             await _db.SaveChangesAsync();
-            return message;
+
+            var sender = await _db.Users.FindAsync(senderId);
+
+            return new MessageDto
+            {
+                //Id = (int)message.Id,
+                SenderId = senderId,
+                SenderName = sender?.Username ?? "Unknown",
+                GroupId = groupId,
+                Content = content,
+                CreatedAt = message.CreatedAt
+            };
         }
 
         /// <summary>
@@ -52,7 +63,7 @@ namespace Server.Data
         /// <summary>
         /// Retrieves a list of messages for a specific user within a specified group.
         /// </summary>
-        public async Task<List<Message>> GetMessagesForUserAsync(int userId, int groupId)
+        public async Task<List<MessageDto>> GetMessagesForUserAsync(int userId, int groupId)
         {
             bool isMember = await _db.ChatGroupMembers
                 .AnyAsync(gm => gm.ChatGroupId == groupId && gm.UserId == userId);
@@ -63,6 +74,15 @@ namespace Server.Data
             return await _db.Messages
                 .Where(m => m.GroupId == groupId)
                 .OrderBy(m => m.CreatedAt)
+                .Select(m => new MessageDto
+                {
+                    //Id = (int)m.Id,
+                    SenderId = m.SenderId,
+                    SenderName = m.Sender.Username,
+                    GroupId = m.GroupId,
+                    Content = m.Content,
+                    CreatedAt = m.CreatedAt
+                })
                 .ToListAsync();
         }
 
@@ -70,9 +90,9 @@ namespace Server.Data
         /// <summary>
         /// Retrieves a message by its unique identifier.
         /// </summary>
-        public async Task<Message?> GetMessageByIdAsync(long id)
-        {
-            return await _db.Messages.FindAsync(id);
-        }
+        //public async Task<MessageDto?> GetMessageByIdAsync(long id)
+        //{
+        //    return await _db.Messages.FindAsync(id);
+        //}
     }
 }

@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Server.Data;
-using Server.Models;
 using Shared.Models;
 using System.Security.Claims;
 
@@ -27,11 +26,8 @@ namespace Server.Controllers
                 return BadRequest("Missing content");
             try
             {
-                int userId = GetUserIdFromJwt();
-                if (userId != dto.SenderId)
-                    dto.SenderId = userId; // Ensure sender ID matches authenticated user
-
-                var message = await _service.SendMessageAsync(userId, dto.GroupId, dto.Content);
+                dto.SenderId = GetUserIdFromJwt();
+                var message = await _service.SendMessageAsync(dto.SenderId, dto.GroupId, dto.Content);
                 return Ok(message);
             }
             catch (UnauthorizedAccessException ex)

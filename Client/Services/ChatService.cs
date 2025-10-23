@@ -15,41 +15,40 @@ namespace Client.Services
         }
 
         // --- Get all groups the user is a member of ---
-        public async Task<List<ChatGroupDto>?> GetGroupsAsync()
+        public async Task<List<ChatGroupDto>> GetGroupsAsync()
         {
             HttpRequestMessage? request = new HttpRequestMessage(HttpMethod.Get, "api/Messages/JoinedGroups");
             request.SetBrowserRequestCredentials(BrowserRequestCredentials.Include);
             HttpResponseMessage? response = await httpClient.SendAsync(request);
+
             if (!response.IsSuccessStatusCode)
-            {
-                Console.WriteLine($"Failed: {response.StatusCode}");
-                return null;
-            }
-            var chatGroups = new List<ChatGroupDto>();
-            chatGroups = await response.Content.ReadFromJsonAsync<List<ChatGroupDto>>();
+                throw new HttpRequestException($"Failed to get groups: {response.StatusCode}");
+
+            List<ChatGroupDto>? chatGroups = await response.Content.ReadFromJsonAsync<List<ChatGroupDto>>();
+            if (chatGroups == null)
+                throw new InvalidOperationException("Response did not contain valid chat groups.");
             return chatGroups;
         }
 
         // --- Get messages for a specific group ---
-        public async Task<List<Message>?> GetMessagesAsync(int groupId)
+        public async Task<List<MessageDto>> GetMessagesAsync(int groupId)
         {
             HttpRequestMessage? request = new HttpRequestMessage(HttpMethod.Get, $"api/Messages/Group/{groupId}");
             request.SetBrowserRequestCredentials(BrowserRequestCredentials.Include);
             HttpResponseMessage? response = await httpClient.SendAsync(request);
+
             if (!response.IsSuccessStatusCode)
-            {
-                Console.WriteLine($"Failed: {response.StatusCode}");
-                return null;
-            }
-            var messages = new List<Message>();
-            messages = await response.Content.ReadFromJsonAsync<List<Message>>();
+                throw new HttpRequestException($"Failed to get messages: {response.StatusCode}");
+
+            List<MessageDto>? messages = await response.Content.ReadFromJsonAsync<List<MessageDto>>();
+            if (messages == null)
+                throw new InvalidOperationException("Response did not contain valid messages.");
+
             return messages;
-            //return await httpClient.GetFromJsonAsync<List<Message>>($"api/Messages/Group/{groupId}")
-            //       ?? new List<Message>();
         }
 
         // --- Send a message to a group ---
-        public async Task<Message> SendMessageAsync(int groupId, string content)
+        public async Task<MessageDto> SendMessageAsync(int groupId, string content)
         {
             MessageDto? dto = new MessageDto { GroupId = groupId, Content = content };
 
@@ -62,26 +61,15 @@ namespace Client.Services
 
             if (!response.IsSuccessStatusCode)
             {
-                // Optionally, read the error message from the response
                 string? error = await response.Content.ReadAsStringAsync();
                 throw new HttpRequestException($"Failed to send message. Status: {response.StatusCode}, Error: {error}");
             }
 
-            Message? message = await response.Content.ReadFromJsonAsync<Message>();
+            MessageDto? message = await response.Content.ReadFromJsonAsync<MessageDto>();
             if (message == null)
                 throw new InvalidOperationException("Response did not contain a valid message.");
 
             return message;
         }
-    }
-
-    // --- Minimal ChatGroup model for client ---
-
-    public class Message
-    {
-        public int SenderId { get; set; }
-        public int GroupId { get; set; }
-        public string Content { get; set; } = null!;
-        public DateTime CreatedAt { get; set; }
     }
 }
