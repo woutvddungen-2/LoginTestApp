@@ -19,7 +19,7 @@ namespace Server.Data
 
             // Composite key for GroupMember
             modelBuilder.Entity<ChatGroupMember>()
-                .HasKey(gm => new { gm.UserId, gm.GroupId });
+                .HasKey(gm => new { gm.UserId, gm.ChatGroupId });
 
             // Relationships
             modelBuilder.Entity<ChatGroupMember>()
@@ -28,9 +28,9 @@ namespace Server.Data
                 .HasForeignKey(gm => gm.UserId);
 
             modelBuilder.Entity<ChatGroupMember>()
-                .HasOne(gm => gm.Group)
+                .HasOne(gm => gm.ChatGroup)
                 .WithMany(g => g.Members)
-                .HasForeignKey(gm => gm.GroupId);
+                .HasForeignKey(gm => gm.ChatGroupId);
 
             modelBuilder.Entity<Message>()
                 .HasOne(m => m.Sender)

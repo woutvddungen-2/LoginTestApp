@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Server.Data;
-using Server.Models;
 using Shared.Models;
 using System.Security.Claims;
 
@@ -21,14 +20,14 @@ namespace Server.Controllers
         }
 
         [HttpPost("Send")]
-        public async Task<ActionResult<Message>> SendMessage([FromBody] MessageDto dto)
+        public async Task<ActionResult<MessageDto>> SendMessage([FromBody] MessageDto dto)
         {
             if (string.IsNullOrWhiteSpace(dto.Content))
                 return BadRequest("Missing content");
             try
             {
-                int userId = GetUserIdFromJwt();
-                var message = await _service.SendMessageAsync(userId, dto.GroupId, dto.Content);
+                dto.SenderId = GetUserIdFromJwt();
+                var message = await _service.SendMessageAsync(dto.SenderId, dto.GroupId, dto.Content);
                 return Ok(message);
             }
             catch (UnauthorizedAccessException ex)
@@ -36,9 +35,23 @@ namespace Server.Controllers
                 return Forbid(ex.Message);
             }
         }
+        [HttpGet("JoinedGroups")]
+        public async Task<ActionResult<List<ChatGroupDto>>> GetMyGroups()
+        {
+            try
+            {
+                int userId = GetUserIdFromJwt();
+                var groups = await _service.GetChatGroupsForUserAsync(userId);
+                return Ok(groups);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Forbid(ex.Message);
+            }
+}
 
         [HttpGet("Group/{id}")]
-        public async Task<ActionResult<List<Message>>> GetMessagesForUser(int id)
+        public async Task<ActionResult<List<MessageDto>>> GetMessagesForUser(int id)
         {
             try
             {
@@ -52,13 +65,13 @@ namespace Server.Controllers
             }
         }
 
-        [HttpGet("Id/{id}")]
-        public async Task<ActionResult<Message>> GetMessageById(int id)
-        {
-            var message = await _service.GetMessageByIdAsync(id);
-            if (message == null) return NotFound();
-            return Ok(message);
-        }
+        //[HttpGet("Id/{id}")]
+        //public async Task<ActionResult<Message>> GetMessageById(int id)
+        //{
+        //    var message = await _service.GetMessageByIdAsync(id);
+        //    if (message == null) return NotFound();
+        //    return Ok(message);
+        //}
 
         //-------------------- HELPERS --------------------
         private int GetUserIdFromJwt()
