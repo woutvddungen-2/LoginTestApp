@@ -27,7 +27,7 @@ namespace Server.Controllers
             try { userId = GetUserIdFromJwt(); }
             catch { return Unauthorized(); }
 
-            var products = await _service.GetProductsByUser(userId);
+            List<ProductDto> products = await _service.GetProductsByUser(userId);
             return Ok(products.Select(p => new { p.Name, p.Price }));
         }
 

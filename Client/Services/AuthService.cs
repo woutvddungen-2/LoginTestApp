@@ -16,22 +16,22 @@ namespace Client.Services
 
         public async Task<bool> LoginAsync(string username, string password)
         {
-            var request = new HttpRequestMessage(HttpMethod.Post, "api/User/login")
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "api/User/login")
             {
                 Content = JsonContent.Create(new LoginDto { Username = username, Password = password })
             };
             request.SetBrowserRequestCredentials(BrowserRequestCredentials.Include);
 
-            var response = await httpClient.SendAsync(request);
+            HttpResponseMessage? response = await httpClient.SendAsync(request);
             return response.IsSuccessStatusCode;
         }
 
         public async Task<bool> LogoutAsync()
         {
-            var request = new HttpRequestMessage(HttpMethod.Post, "api/User/logout");
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "api/User/logout");
             request.SetBrowserRequestCredentials(BrowserRequestCredentials.Include);
 
-            var response = await httpClient.SendAsync(request);
+            HttpResponseMessage? response = await httpClient.SendAsync(request);
             return response.IsSuccessStatusCode;
         }
 
@@ -39,20 +39,11 @@ namespace Client.Services
         {
             try
             {
-                HttpRequestMessage? request = new HttpRequestMessage(HttpMethod.Get, "api/User/verify");
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "api/User/verify");
                 request.SetBrowserRequestCredentials(BrowserRequestCredentials.Include);
 
                 HttpResponseMessage? response = await httpClient.SendAsync(request);
-
-                if (response.IsSuccessStatusCode)
-                {
-                    LoginStatusResponse? result = await response.Content.ReadFromJsonAsync<LoginStatusResponse>();
-                    return result?.loggedIn ?? false;
-                }
-                else
-                {
-                    return false;
-                }
+                return response.IsSuccessStatusCode;
             }
             catch (Exception ex)
             {
@@ -65,9 +56,9 @@ namespace Client.Services
         {
             try
             {
-                var request = new HttpRequestMessage(HttpMethod.Get, "api/User/GetUserInfo");
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "api/User/verify");
                 request.SetBrowserRequestCredentials(BrowserRequestCredentials.Include);
-                var response = await httpClient.SendAsync(request);
+                HttpResponseMessage? response = await httpClient.SendAsync(request);
 
                 if (!response.IsSuccessStatusCode)
                     return null;
@@ -78,12 +69,6 @@ namespace Client.Services
             {
                 return null;
             }
-        }
-
-        public class LoginStatusResponse
-        {
-            public bool loggedIn { get; set; }
-            public string? username { get; set; }
         }
     }
 }

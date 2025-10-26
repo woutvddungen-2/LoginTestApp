@@ -17,11 +17,18 @@ namespace Server.Services
         /// <summary>
         /// Get all products from the database, ordered by name.
         /// </summary>
-        public async Task<List<Product>> GetProductsByUser(int userId)
+        public async Task<List<ProductDto>> GetProductsByUser(int userId)
         {
-            return await _db.Products
+            
+            List<Product> pruducts = await _db.Products
                 .Where(p => p.UserId == userId)
                 .ToListAsync();
+            List<ProductDto> productsDto = new List<ProductDto>();
+            foreach (Product p in pruducts)
+            {
+                productsDto.Add(new ProductDto { Name = p.Name, Price = p.Price});
+            }
+            return productsDto;
         }
 
 

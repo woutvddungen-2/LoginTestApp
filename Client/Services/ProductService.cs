@@ -1,5 +1,4 @@
-﻿using Client.Models;
-using Microsoft.AspNetCore.Components.WebAssembly.Http;
+﻿using Microsoft.AspNetCore.Components.WebAssembly.Http;
 using Shared.Models;
 using System.Net.Http.Json;
 
@@ -12,11 +11,6 @@ namespace Client.Services
         public ProductService(HttpClient httpClient)
         {
             this.httpClient = httpClient;
-        }
-
-        public async Task<List<Product>?> GetProductsAsync()
-        {
-            return await httpClient.GetFromJsonAsync<List<Product>>("api/Products");
         }
 
         public async Task<List<ProductDto>?> GetAllProductsAsync()
