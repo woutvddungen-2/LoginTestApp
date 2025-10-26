@@ -18,6 +18,21 @@ namespace Server.Controllers
             _service = service;
         }
 
+        [HttpPost("register")]
+        public async Task<IActionResult> Register([FromBody] LoginDto register)
+        {
+            try
+            {
+                await _service.Register(register.Username, register.Password);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = "Username already exists, exception: " + ex.Message });
+            }
+            return Ok(new { message = "User registered successfully" });
+        }
+
+
         [HttpPost("login")]
         public IActionResult Login([FromBody] LoginDto login)
         {
