@@ -4,10 +4,20 @@
 
 <h3>Login</h3>
 
-<input @bind="username" placeholder="Username" />
-<input @bind="password" placeholder="Password" type="password" />
-<button @onclick="LoginAsync">Login</button>
-<button @onclick="LogoutAsync">Logout</button>
+
+@if(isLoggedIn)
+{    
+    <p>Welcome, @username!</p>
+    <button @onclick="LogoutAsync">Logout</button>
+}
+else
+{
+    <p>Please log in.</p>
+    <input @bind="username" placeholder="Username" />
+    <input @bind="password" placeholder="Password" type="password" />
+    <button @onclick="LoginAsync">Login</button>
+}
+
 
 @if(!string.IsNullOrEmpty(message))
 {
@@ -18,6 +28,17 @@
     private string username = "";
     private string password = "";
     private string message = "";
+    private bool isLoggedIn = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        UserDto? user = await AuthService.GetCurrentUserAsync();
+        if (user != null)
+        {
+            isLoggedIn = true;
+            username = user.Username;
+        }
+    }
 
     private async Task LoginAsync()
     {
@@ -25,6 +46,7 @@
         if (result)
         {
             message = "Login successful!";
+            isLoggedIn = true;
         }
         else
         {
@@ -38,6 +60,8 @@
         if (result)
         {
             message = "Logged out successfully";
+            isLoggedIn = false;
+            username = "";
         }
         else
         {
