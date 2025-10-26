@@ -1,6 +1,9 @@
 ﻿@page "/chat"
 @using Client.Services
 @using Shared.Models
+@using Microsoft.JSInterop
+
+@inject IJSRuntime JS
 @inject ChatService ChatService
 @inject AuthService AuthService
 
@@ -38,7 +41,7 @@ else
 
         <!-- Messages window -->
         <div class="chat-window">
-            <div class="messages-container">
+            <div class="messages-container" @ref="messagesContainer">
                 @foreach (var msg in Messages)
                 {
                     <div class="message @(msg.SenderId == currentUserId ? "mine" : "theirs")">
@@ -66,10 +69,13 @@ else
 @code {
     private List<ChatGroupDto> Groups = new();
     private List<MessageDto> Messages = new();
+
     private int selectedGroupId = 0;
     private string NewMessage = string.Empty;
     private bool isLoggedIn = false;
-    private int currentUserId;
+    private int currentUserId; 
+
+    private ElementReference messagesContainer;
 
     private int SelectedGroupId
     {
@@ -84,7 +90,7 @@ else
         }
     }
 
-
+    // ----------------- Task Methods -----------------
     protected override async Task OnInitializedAsync()
     {
         UserDto? user = await AuthService.GetCurrentUserAsync();
@@ -102,6 +108,10 @@ else
         {
             Messages = await ChatService.GetMessagesAsync(groupId);
             StateHasChanged();
+
+            // Scroll after loading
+            await Task.Delay(50);
+            await ScrollToBottomAsync();
         }
         else
         {
@@ -119,10 +129,21 @@ else
                 Messages.Add(sent);
                 NewMessage = "";
                 StateHasChanged();
+
+                // Scroll after sending
+                await Task.Delay(50);
+                await ScrollToBottomAsync();
             }
         }
     }
+    
+    private async Task ScrollToBottomAsync()
+    {
+        await JS.InvokeVoidAsync("scrollHelper.scrollToEnd", messagesContainer);
+    }
 
+
+    // Handle Enter key press to send message
     private async Task OnEnterPress(KeyboardEventArgs e)
     {
         if (e.Key == "Enter")
