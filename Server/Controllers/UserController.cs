@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Server.Services;
 using Shared.Models;
+using System.Security.Claims;
 
 namespace Server.Controllers
 {
@@ -41,6 +42,21 @@ namespace Server.Controllers
             return Ok(new { loggedIn = true, username });
         }
 
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HttpGet("GetUserInfo")]
+        public async Task<ActionResult<UserDto>> GetCurrentUserAsync()
+        {
+            try
+            {
+                int userId = GetUserIdFromJwt();
+                UserDto user = await _service.GetUserInfo(userId);
+                return user;
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Forbid(ex.Message);
+            }
+        }
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost("logout")]
@@ -48,6 +64,12 @@ namespace Server.Controllers
         {
             Response.Cookies.Delete("jwt");
             return Ok(new { message = "Logged out" });
+        }
+
+        private int GetUserIdFromJwt()
+        {
+            var claim = User.FindFirst(ClaimTypes.NameIdentifier) ?? throw new UnauthorizedAccessException();
+            return int.Parse(claim.Value);
         }
     }
 }

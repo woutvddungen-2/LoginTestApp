@@ -1,10 +1,10 @@
 ﻿@page "/chat"
-@using Client.Services
 @using Shared.Models
+@using Client.Services
 @inject ChatService ChatService
 @inject AuthService AuthService
 
-<h3>Chat</h3>
+<h3 class="text-xl font-semibold mb-4">💬 Chat</h3>
 
 @if (!isLoggedIn)
 {
@@ -12,39 +12,50 @@
 }
 else
 {
-    <div>
-        @if (Groups == null || Groups.Count == 0)
-        {
-            <p>No chat groups available.</p>
-        }
-        else
-        {
-            <label>Select Group:</label>
-            <select @bind="SelectedGroupId" @bind:event="onchange">
+    <div class="chat-container">
+        <div class="chat-sidebar">
+            <label class="block mb-2 font-semibold">Select Group:</label>
+            <select @bind="SelectedGroupId" @bind:event="onchange" class="group-select">
                 <option value="0">-- Select --</option>
                 @foreach (var group in Groups)
                 {
                     <option value="@group.Id">@group.Name</option>
                 }
             </select>
-        }
-    </div>
-
-    @if (SelectedGroupId != 0)
-    {
-        <div style="margin-top:20px;">
-            <h4>Messages</h4>
-            <ul>
-                @foreach (var msg in Messages)
-                {
-                    <li><strong>@msg.SenderName:</strong> @msg.Content (@msg.CreatedAt.ToLocalTime())</li>
-                }
-            </ul>
-
-            <input type="text" @bind="NewMessage" placeholder="Type a message" />
-            <button class="btn btn-primary" @onclick="SendMessage">Send</button>
         </div>
-    }
+
+        <div class="chat-window">
+            @if (SelectedGroupId == 0)
+            {
+                <p class="text-gray-500">Select a group to start chatting.</p>
+            }
+            else
+            {
+                <div class="messages-container" @ref="messagesDiv">
+                    @foreach (var msg in Messages)
+                    {
+                        var isMine = msg.SenderId == currentUserId;
+                        <div class="message @(isMine ? "mine" : "theirs")">
+                            <div class="bubble">
+                                @if (!isMine)
+                                {
+                                    <span class="sender">@msg.SenderName</span>
+                                }
+                                <span>@msg.Content</span>
+                                <div class="timestamp">@msg.CreatedAt.ToLocalTime().ToShortTimeString()</div>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <div class="input-bar">
+                    <input @bind="NewMessage" @bind:event="oninput" placeholder="Type a message..."
+                           @onkeydown="HandleKeyPress" />
+                    <button class="send-btn" @onclick="SendMessage">Send</button>
+                </div>
+            }
+        </div>
+    </div>
 }
 
 @code {
@@ -53,6 +64,8 @@ else
     private int selectedGroupId;
     private string NewMessage = "";
     private bool isLoggedIn = false;
+    private int currentUserId;
+    private ElementReference messagesDiv;
 
     private int SelectedGroupId
     {
@@ -73,6 +86,11 @@ else
         if (isLoggedIn)
         {
             Groups = await ChatService.GetGroupsAsync();
+            var currentUser = await AuthService.GetCurrentUserAsync();
+            if (currentUser != null)
+            {
+                currentUserId = currentUser.Id;
+            }
         }
     }
 
@@ -81,12 +99,13 @@ else
         if (groupId != 0)
         {
             Messages = await ChatService.GetMessagesAsync(groupId);
-            StateHasChanged();
+            await ScrollToBottomAsync();
         }
         else
         {
             Messages.Clear();
         }
+        StateHasChanged();
     }
 
     private async Task SendMessage()
@@ -94,12 +113,22 @@ else
         if (!string.IsNullOrWhiteSpace(NewMessage) && SelectedGroupId != 0)
         {
             var sent = await ChatService.SendMessageAsync(SelectedGroupId, NewMessage);
-            if (sent != null)
-            {
-                Messages.Add(sent);
-                NewMessage = "";
-                StateHasChanged();
-            }
+            Messages.Add(sent);
+            NewMessage = "";
+            await ScrollToBottomAsync();
         }
     }
+
+    private void HandleKeyPress(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+            _ = SendMessage();
+    }
+
+    private async Task ScrollToBottomAsync()
+    {
+        await Task.Delay(50);
+        //await messagesDiv.ScrollToEndAsync();
+    }
+
 }

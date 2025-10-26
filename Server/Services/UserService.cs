@@ -1,6 +1,8 @@
-﻿using Microsoft.IdentityModel.Tokens;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 using Server.Data;
 using Server.Models;
+using Shared.Models;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -29,6 +31,23 @@ namespace Server.Services
                 return null;
 
             return GenerateJwtToken(user);
+        }
+
+
+        /// <summary>
+        /// Retrieves user information based on the specified user ID.
+        /// </summary>
+        public async Task<UserDto> GetUserInfo(int Id)
+        {
+            var user = await _db.Users.FindAsync(Id);
+            if (user == null)
+                throw new KeyNotFoundException("User not found");
+            UserDto user1 = new UserDto
+            {
+                Id = user.Id,
+                Username = user.Username
+            };
+            return user1;
         }
 
         //---------------------- Helpers ----------------------

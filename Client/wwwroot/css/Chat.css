@@ -1,0 +1,111 @@
+﻿.chat-container {
+    display: flex;
+    height: 70vh;
+    max-height: 700px;
+    border: 1px solid #ccc;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #f9f9f9;
+}
+
+.chat-sidebar {
+    width: 25%;
+    background: #f0f0f0;
+    padding: 1rem;
+    border-right: 1px solid #ddd;
+}
+
+.chat-window {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    background: #fff;
+}
+
+.messages-container {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
+.message {
+    display: flex;
+    max-width: 75%;
+}
+
+    .message.mine {
+        align-self: flex-end;
+        justify-content: flex-end;
+    }
+
+    .message.theirs {
+        align-self: flex-start;
+    }
+
+.bubble {
+    background: #e1e1e1;
+    border-radius: 1rem;
+    padding: 0.5rem 0.8rem;
+    position: relative;
+    word-break: break-word;
+}
+
+.message.mine .bubble {
+    background: #0078ff;
+    color: white;
+}
+
+.sender {
+    font-weight: 600;
+    display: block;
+    margin-bottom: 0.2rem;
+}
+
+.timestamp {
+    font-size: 0.7rem;
+    opacity: 0.7;
+    margin-top: 0.2rem;
+    text-align: right;
+}
+
+.input-bar {
+    display: flex;
+    padding: 0.6rem;
+    border-top: 1px solid #ddd;
+    background: #fafafa;
+}
+
+    .input-bar input {
+        flex: 1;
+        border: 1px solid #ccc;
+        border-radius: 20px;
+        padding: 0.5rem 1rem;
+        font-size: 1rem;
+        outline: none;
+    }
+
+.send-btn {
+    background: #0078ff;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    margin-left: 0.5rem;
+    padding: 0.5rem 1.2rem;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+    .send-btn:hover {
+        background: #0060cc;
+    }
+
+.group-select {
+    width: 100%;
+    padding: 0.4rem;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+}

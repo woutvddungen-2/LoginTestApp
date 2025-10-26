@@ -18,7 +18,6 @@ namespace Server.Data
         /// </summary>
         public async Task<MessageDto> SendMessageAsync(int senderId, int groupId, string content)
         {
-            // Verify membership
             bool isMember = await _db.ChatGroupMembers
                 .AnyAsync(gm => gm.ChatGroupId == groupId && gm.UserId == senderId);
 
@@ -85,14 +84,5 @@ namespace Server.Data
                 })
                 .ToListAsync();
         }
-
-
-        /// <summary>
-        /// Retrieves a message by its unique identifier.
-        /// </summary>
-        //public async Task<MessageDto?> GetMessageByIdAsync(long id)
-        //{
-        //    return await _db.Messages.FindAsync(id);
-        //}
     }
 }

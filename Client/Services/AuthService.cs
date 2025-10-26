@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Components.WebAssembly.Http;
 using Shared.Models;
 using System.Net.Http.Json;
+using static System.Net.WebRequestMethods;
 
 namespace Client.Services
 {
@@ -57,6 +58,25 @@ namespace Client.Services
             {
                 Console.WriteLine($"Login status check failed: {ex.Message}");
                 return false;
+            }
+        }
+
+        public async Task<UserDto?> GetCurrentUserAsync()
+        {
+            try
+            {
+                var request = new HttpRequestMessage(HttpMethod.Get, "api/User/GetUserInfo");
+                request.SetBrowserRequestCredentials(BrowserRequestCredentials.Include);
+                var response = await httpClient.SendAsync(request);
+
+                if (!response.IsSuccessStatusCode)
+                    return null;
+
+                return await response.Content.ReadFromJsonAsync<UserDto>();
+            }
+            catch
+            {
+                return null;
             }
         }
 
