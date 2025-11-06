@@ -23,7 +23,7 @@
         // --- Perform login ---
         HttpRequestMessage? request = new HttpRequestMessage(HttpMethod.Post, "api/User/login")
         {
-            Content = JsonContent.Create(new { username = "bob", password = "password123" })
+            Content = JsonContent.Create(new { username = "bob", password = "Password123" })
         };
 
         // ✅ Allow cookies in the request
