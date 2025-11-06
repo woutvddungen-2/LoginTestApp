@@ -1,18 +1,5 @@
 {
   "profiles": {
-    "http": {
-      "commandName": "Project",
-      "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "",
-        "DatabaseSettings__Ip": "",
-        "DatabaseSettings__DatabaseName": "",
-        "DatabaseSettings__UserID": "root",
-        "DatabaseSettings__Password": "",
-        "DatabaseSettings__Port": ""
-      },
-      "dotnetRunMessages": true,
-      "applicationUrl": "http://localhost:5000"
-    },
     "https": {
       "commandName": "Project",
       "launchBrowser": false,
